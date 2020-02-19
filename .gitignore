@@ -1,0 +1,8 @@
+.vscode/*
+.idea/*
+__pycache__/*
+.ipynb_chechpoints/*
+1-billion-word/*
+GoogleNews-vectors-negative300.bin
+pre_corpus.pickle
+preweight.pickle
