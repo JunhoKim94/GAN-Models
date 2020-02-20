@@ -24,11 +24,11 @@ total_data = x_train.shape[0]
 batch = 500
 classes = max(y_train)
 epochs = 10
-k = 3
-noise_input = 128
-lr = 0.001
+k = 10
+noise_input = 256
+lr = 0.0001
 
-hidden = [512,256,128,256,512]
+hidden = [512,256,256,256,512]
 
 G = MLP(noise_input, hidden, input_dim).to(device)
 D = MLP(input_dim, hidden, 1).to(device)
@@ -62,19 +62,31 @@ for epoch in range(epochs + 1):
         G_optimizer.step()
         
     if epoch % 1 == 0:
-        
-        print(f"G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}")
+        temp = torch.sum(D(G(z)), dim = 0)/ batch
+        print(f"G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}  |  Predict avg : {temp}")
 
-noise = np.random.normal(size = (10, noise_input))
+        if epoch % 4 == 0:
+            params = dict()
+            params["G_weight"] = G.state_dict()
+            params["D_weight"] = D.state_dict()
+            torch.save(params, "./model.pt")
+
+
+
+noise = np.random.normal(0, 1,size = (10, noise_input))
 noise = torch.Tensor(noise).to(device)
 noise.requires_grad_(False)
-img = G(noise)
+img = F.sigmoid(G(noise))
 
-i = np.random.choice(10,1)
-image = img[i]
-image = image.reshape(28,28).to("cpu")
-image = np.array(image.detach(), dtype = np.uint8)
-plt.imshow(image)
+stack = []
+for i in range(10):
+    image = img[i]
+    image = image.reshape(28,28).to("cpu") * 255
+    image = np.array(image.detach(), dtype = np.uint8) 
+    stack.append(image)
+
+stack = np.concatenate(stack, axis = 1)
+plt.imshow(stack)
 plt.show()
 
 #test = np.array(x_train[50] * 255, dtype= np.uint8).reshape(28,28)

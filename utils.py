@@ -21,7 +21,7 @@ def load_mnist(data_path):
     tt = pd.read_csv(data_path)
     tt = np.array(tt)
     
-    x_train = tt[:, 1:]
+    x_train = tt[:, 1:] / 255
     y_train = tt[:, 1]
     
     return x_train, y_train

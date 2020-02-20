@@ -14,14 +14,15 @@ class MLP(nn.Module):
 
         module = [
             nn.Linear(self.input,self.hidden[0]),
-            nn.ReLU()
+            nn.ReLU(inplace= True)
         ]
         for i in range(len(self.hidden) - 1):
             module.append(nn.Linear(self.hidden[i], self.hidden[i+1]))
-            module.append(nn.ReLU())
+            module.append(nn.ReLU(inplace= True))
 
         module.append(nn.Linear(self.hidden[-1], output_size))
         module = nn.ModuleList(module)
+        
 
         self.linear = nn.Sequential(
             *module
