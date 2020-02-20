@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import os
-import cv2
 import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
@@ -24,7 +23,7 @@ total_data = x_train.shape[0]
 batch = 500
 classes = max(y_train)
 epochs = 10
-k = 10
+k = 3
 noise_input = 256
 lr = 0.0001
 
@@ -60,10 +59,13 @@ for epoch in range(epochs + 1):
         G_optimizer.zero_grad()
         G_loss.backward()
         G_optimizer.step()
+
+        
         
     if epoch % 1 == 0:
-        temp = torch.sum(D(G(z)), dim = 0)/ batch
-        print(f"G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}  |  Predict avg : {temp}")
+        test = torch.Tensor(np.random.normal(size = (100, noise_input))).to(device)
+        temp = torch.sum(F.sigmoid(D(G(test))), dim = 0) / 100
+        print(f"G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}  |  Predict avg : {temp.data}")
 
         if epoch % 4 == 0:
             params = dict()
