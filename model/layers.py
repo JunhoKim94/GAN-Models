@@ -7,7 +7,12 @@ class MLP(nn.Module):
 
     def __init__(self, input_size, hidden, output_size, dropout):
         super(MLP, self).__init__()
-        
+        '''
+        input_size : input data dimension
+        hidden : array of hidden layer number ex) [3,2,4]
+        output_size: layer output dimension
+        dropout : dropout ratio
+        '''
 
         self.input = input_size
         self.output_size = output_size

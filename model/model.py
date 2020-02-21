@@ -23,7 +23,7 @@ class GAN(MLP):
         self.embed = nn.Embedding(classes,embed_size)
         
 
-        #self.init_params()
+        self.init_params()
     def init_params(self):
         for p in self.parameters():
             if(p.dim() > 1):

@@ -22,14 +22,14 @@ total_data = x_train.shape[0]
 classes = max(y_train)
 batch = 500
 epochs = 100
-k = 10
+k = 2
 noise_input = 100
 lr = 0.0002
 mode = None
 
-g_hidden = [256, 256, 512, input_dim]
-#D 학습시키기가 어렵기 때무에 오히려 Shallow 한게 나을수도 --> k값을 늘리거나
-d_hidden = [256, 1]
+#G 학습시키기가 어렵기 때무에 오히려 Shallow 한게 학습이 잘 됨
+g_hidden = [256]
+d_hidden = [256]
 G = GAN(noise_input, 50, g_hidden, input_dim, classes, mode = mode).to(device)
 D = GAN(input_dim, 50, d_hidden, 1, classes, mode = mode).to(device)
 
@@ -63,6 +63,7 @@ for epoch in range(epochs + 1):
 
             
         z = torch.randn(batch, noise_input).to(device)
+        #Minimize가 어려우니 Maximize를 하자 == label을 반대로 예측하자
         G_loss = criterion(D(G(z,y_class), y_class), y_batch)
         G_optimizer.zero_grad()
         G_loss.backward()
@@ -75,8 +76,9 @@ for epoch in range(epochs + 1):
         z = torch.randn(batch, noise_input).to(device)
         fake_label = torch.LongTensor(np.random.choice(10, size = (batch))).to(device)
 
-        temp = torch.sum(D(G(z, fake_label),fake_label), dim = 0) / batch
-        print(f"epoch : {epoch}  |  G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}  |  Predict avg : {temp.data}")
+        g_temp = torch.sum(D(G(z, fake_label),fake_label), dim = 0) / batch
+
+        print(f"epoch : {epoch}  |  G loss : {G_loss}  | D loss  :  {D_loss}  | Time Spended : {time.time() - st}  |  Predict avg : {g_temp.data}")
         #이거 필수
         del G_out, D_out, D_loss, G_loss
         
