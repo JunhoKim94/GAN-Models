@@ -10,8 +10,8 @@ import time
 from model.model import MLP,GAN
 
 print("\n ==============================> Training Start <=============================")
-device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
-#device = torch.device("cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
+device = torch.device("cpu")
 print(torch.cuda.is_available())
 
 x_train, y_train, x_test, y_test = load_mnist("./data/mnist")
