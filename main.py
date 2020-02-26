@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from utils import *
 import time
-from model.model import MLP,GAN
+from model.model import MLP,GAN, DCGAN
 
 print("\n ==============================> Training Start <=============================")
 #device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
@@ -19,6 +19,7 @@ x_train, y_train, x_test, y_test = load_mnist("./data/mnist")
 
 input_dim = x_train.shape[1]
 total_data = x_train.shape[0]
+print(input_dim)
 classes = max(y_train)
 batch = 500
 epochs = 100
@@ -30,8 +31,14 @@ mode = None
 #G 학습시키기가 어렵기 때무에 오히려 Shallow 한게 학습이 잘 됨
 g_hidden = [256]
 d_hidden = [256]
-G = GAN(noise_input, 50, g_hidden, input_dim, classes, mode = mode).to(device)
-D = GAN(input_dim, 50, d_hidden, 1, classes, mode = mode).to(device)
+
+g_params = [(128, 7, 1, 0), (64, 4,2, 1), (1,4,2, 1)]
+d_params = [(1,4,2, 1), (64,4,2, 1),(1,7,2, 0)]
+#G = GAN(noise_input, 50, g_hidden, input_dim, classes, mode = mode).to(device)
+#D = GAN(input_dim, 50, d_hidden, 1, classes, mode = mode).to(device)
+
+G = DCGAN(100, g_params, mode = "g")
+D = DCGAN(1, d_params, mode = "d")
 
 criterion = nn.BCELoss()
 G_optimizer = torch.optim.Adam(G.parameters(), lr = lr)
@@ -47,12 +54,15 @@ for epoch in range(epochs + 1):
         for i in range(k):
             z = torch.randn(batch, noise_input).to(device)
 
+            z = z.view(batch,noise_input,1,1)
             seed = np.random.choice(total_data, batch)
             x_batch = torch.Tensor(x_train[seed,:]).to(device)
+
+            x_batch = x_batch.view(batch, 1, 28,28)
             y_class = torch.LongTensor(y_train[seed]).to(device)
 
-            y_batch = torch.ones(batch,1).to(device)
-            y_noise = torch.zeros(batch,1).to(device)
+            y_batch = torch.ones(batch).to(device)
+            y_noise = torch.zeros(batch).to(device)
 
             G_out = G(z, y_class)
             D_out = D(x_batch, y_class)
@@ -63,6 +73,8 @@ for epoch in range(epochs + 1):
 
             
         z = torch.randn(batch, noise_input).to(device)
+        
+        z = z.view(batch, noise_input , 1, 1)
         #Minimize가 어려우니 Maximize를 하자 == label을 반대로 예측하자
         G_loss = criterion(D(G(z,y_class), y_class), y_batch)
         G_optimizer.zero_grad()

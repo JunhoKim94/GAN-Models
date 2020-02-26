@@ -2,7 +2,6 @@ from torch import nn, tensor
 import torch
 import torch.nn.functional as F
 
-
 class MLP(nn.Module):
 
     def __init__(self, input_size, hidden, output_size, dropout):
