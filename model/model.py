@@ -27,7 +27,7 @@ class DCGAN(nn.Module):
             for out, ker, st, pd in params[:-1]:
                 self.module.append(nn.Conv2d(p, out, ker, st, pd))
                 self.module.append(nn.BatchNorm2d(out))
-                self.module.append(nn.ReLU())
+                self.module.append(nn.LeakyReLU())
                 p = out
 
             out, ker, st, pd = params[-1]

@@ -10,8 +10,8 @@ import time
 from model.model import MLP,GAN, DCGAN
 
 print("\n ==============================> Training Start <=============================")
-#device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
-device = torch.device("cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
+#device = torch.device("cpu")
 print(torch.cuda.is_available())
 
 x_train, y_train, x_test, y_test = load_mnist("./data/mnist")
@@ -40,6 +40,13 @@ d_params = [(1,4,2, 1), (64,4,2, 1),(1,7,2, 0)]
 G = DCGAN(100, g_params, mode = "g")
 D = DCGAN(1, d_params, mode = "d")
 
+G.to(device)
+D.to(device)
+'''
+check = torch.load("./model.pt")
+G.load_state_dict(check["G_weight"])
+D.load_state_dict(check["D_weight"])
+'''
 criterion = nn.BCELoss()
 G_optimizer = torch.optim.Adam(G.parameters(), lr = lr)
 D_optimizer = torch.optim.Adam(D.parameters(), lr = lr)
@@ -86,6 +93,7 @@ for epoch in range(epochs + 1):
         
     if epoch % 1 == 0:
         z = torch.randn(batch, noise_input).to(device)
+        z = z.view(batch,noise_input,1,1)
         fake_label = torch.LongTensor(np.random.choice(10, size = (batch))).to(device)
 
         g_temp = torch.sum(D(G(z, fake_label),fake_label), dim = 0) / batch
@@ -96,6 +104,7 @@ for epoch in range(epochs + 1):
         
         if epoch % 10 == 0:
             noise = torch.randn(20, noise_input).to(device)
+            noise = noise.view(20, noise_input, 1, 1)
             fake_label = torch.LongTensor(np.array([0,1,2,3,4,5,6,7,8,9] * 2)).to(device)
 
             img = G(noise, fake_label)
